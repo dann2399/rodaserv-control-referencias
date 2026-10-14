@@ -25,23 +25,17 @@ def hash_pw(p):
     return hashlib.sha256(p.encode("utf-8")).hexdigest()
 
 def load_users():
-    # Optional Streamlit secrets format:
-    # [users.admin]
-    # password = "..."
-    # role = "Administrador"
-    # name = "..."
     users = {}
-    try:
-        if "users" in st.secrets:
-            for u, data in st.secrets["users"].items():
-                users[u] = {
-                    "password": str(data["password"]),
-                    "role": str(data.get("role","Vendedor")),
-                    "name": str(data.get("name",u))
-                }
-    except Exception:
-        pass
-    return users or USERS_DEFAULT
+
+    if "users" in st.secrets:
+        for u, data in st.secrets["users"].items():
+            users[u] = {
+                "password": str(data["password"]),
+                "role": str(data.get("role", "Vendedor")),
+                "name": str(data.get("name", u))
+            }
+
+    return users
 
 def google_sheet_enabled():
     try:
@@ -146,12 +140,14 @@ if not st.session_state.user:
         ok=st.form_submit_button("Ingresar", use_container_width=True)
     if ok:
         users=load_users()
+        st.write("USUARIOS CARGADOS:", users)
+        st.write("LOGIN OK:", st.session_state.user)
         if u in users and (p==users[u]["password"] or hash_pw(p)==users[u]["password"]):
             st.session_state.user={"username":u, **users[u]}
             st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos.")
-    st.info("Usuarios demo: admin/admin123 · bodega/bodega123 · vendedor1/vendor1 · vendedor2/vendor2 · vendedor3/vendor3")
+    st.info("")
     st.stop()
 
 user=st.session_state.user
@@ -159,11 +155,19 @@ user=st.session_state.user
 # -----------------------------
 # HEADER
 # -----------------------------
+user = st.session_state.get("user")
+
+if user is None:
+    st.warning("La sesión ha expirado. Por favor inicia sesión nuevamente.")
+    st.session_state.user = None
+    st.rerun()
+
 st.sidebar.markdown("## 📦 RODASERV")
-st.sidebar.write(f"**{user['name']}**")
-st.sidebar.caption(user["role"])
+st.sidebar.write(f"**{user.get('name', 'Usuario')}**")
+st.sidebar.caption(user.get("role", "Sin rol"))
+
 if st.sidebar.button("Cerrar sesión", use_container_width=True):
-    st.session_state.user=None
+    st.session_state.user = None
     st.rerun()
 
 page=st.sidebar.radio("Menú", ["📊 Dashboard","➕ Nuevo reporte","🔎 Buscar / gestionar","📋 Seguimiento","📥 Exportar"])
