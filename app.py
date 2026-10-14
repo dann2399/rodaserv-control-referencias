@@ -6,18 +6,12 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Rodaserv | Control de Referencias", page_icon="📦", layout="wide")
+st.set_page_config(page_title="Rodaserv | Control de Referenciass", page_icon="📦", layout="wide")
 
 # -----------------------------
 # CONFIG / STORAGE
 # -----------------------------
-USERS_DEFAULT = {
-    "admin": {"password": "admin123", "role": "Administrador", "name": "Administrador"},
-    "bodega": {"password": "bodega123", "role": "Bodega", "name": "Bodega"},
-    "vendedor1": {"password": "vendor1", "role": "Vendedor", "name": "Vendedor 1"},
-    "vendedor2": {"password": "vendor2", "role": "Vendedor", "name": "Vendedor 2"},
-    "vendedor3": {"password": "vendor3", "role": "Vendedor", "name": "Vendedor 3"},
-}
+USERS_DEFAULT = dict(st.secrets["users"])
 
 COLS = [
     "ID","Fecha reporte","Hora reporte","Usuario","Tipo","Referencia","Marca",
